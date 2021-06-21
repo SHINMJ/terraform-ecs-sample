@@ -1,0 +1,29 @@
+name: EC2 CodeDeploy CI
+
+# 릴리즈 될때만 해당 actions 실행되도록 아래와 같이 설정.
+# v로 시작하는 태그가 달린 경우에만 실행.
+# 현재는 테스트용으로 해당 브랜치에 푸시되는 경우에도 작동하도록 설정
+on:
+  push:
+    branches:
+      - example-ci-ec2
+    tags:
+      - 'v*'
+
+# codedeploy 실행
+jobs:
+  deploy-ec2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
+
+      - name: Trigger the CodeDeploy in EC2 instance
+        #run: aws deploy --region <해당 region> create-deployment --application-name <CodeDeploy application name> --deployment-config-name CodeDeployDefault.OneAtATime --deployment-group-name <CodeDeploy Group Name> --github-location repository=<github repository>,commitId=<git commit id>
+        run: aws deploy --region ap-northeast-2 create-deployment --application-name demo-stage --deployment-config-name CodeDeployDefault.OneAtATime --deployment-group-name demo-stage --github-location repository=SHINMJ/terraform-ecs-sample,commitId=${GITHUB_SHA}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_IAM_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_IAM_SECRET_ACCESS_KEY }}
+          Default_region_name: ap-northeast-2

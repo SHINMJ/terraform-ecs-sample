@@ -1,0 +1,16 @@
+
+# EC2 인스턴스에 설치된 AWS CodeDeploy Agent는 프로젝트 루트경로의 appsepc.yml파일을 기준으로 작동한다.
+version: 0.0
+os: linux
+files:
+  - source:  /
+    destination: /home/ubuntu/build/
+
+# deploy 전,후 할일 지정 스크립트 
+hooks:
+  BeforeInstall:
+      - location: app/scripts/before.sh
+        runas: root
+  AfterInstall:
+      - location: app/scripts/after.sh
+        runas: root
